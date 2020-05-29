@@ -1,0 +1,401 @@
+
+/*colores*/
+.VerdeInerapp{
+	color: #689f38;
+}
+.VerdeInterAppObscuro{
+	color:#558b2f; 
+}
+.VerdeInter{
+	color: #2E7D32;
+}
+.VerdeClaroInter{
+	color: #C8E6C9;
+}
+
+.GeneralInter{
+	color: #607D8B;
+}
+.GeneralClaroInter{
+	color: #B0BEC5;
+}
+.GeneraClaritoInter{
+	color: #ECEFF1;
+}
+
+/*---------------------------------------------*/
+
+/*fuentes*/
+
+@font-face {
+  font-family: "UrbanInline";
+  src: url("tipografias/UrbanInline.ttf");
+}
+
+/*---------------------------------------------*/
+
+/*general*/
+
+body{
+	background-color: #EEE;
+}
+
+h1.Titulo{
+	position: absolute;
+	width: 100%;
+	top:-5%;
+	left: 0%;	
+	text-align: center;
+	letter-spacing: .05em;
+	font-size: 5.5em;
+	font-family: UrbanInline;
+	background-color: #EEE;
+	color: #33691E;
+
+	padding-bottom: .1em;
+	text-shadow: 	 0  1px   0   #33691E,
+		             0  2px   0   #285F00,
+		             0  3px   0   #286F08,
+		             0  4px   0   #487F18, 
+		             0  5px   0   #588F28, 
+		             0  6px  0   #689F38,
+		        5px 9px 10px rgba(.5,.5,.5,.5);
+}
+
+.subtitulos{
+	position: absolute;
+	text-align: center;
+	letter-spacing: .15em;
+	font-size: 2em;
+	font-family: UrbanInline;
+	background-color: #EEE;
+	color: #33691E;
+	text-shadow: 	 0  1px   0   #33691E,
+		             0  2px   0   #487F18, 
+		             0  3px   0   #588F28, 
+}
+
+.botones {
+	display: inline-block;
+	padding: 15px 25px;
+	font-size: 24px;
+	cursor: pointer;
+	text-align: center;
+	text-decoration: none;
+	outline: none;
+	color: #393d42;
+	background-color: #c8e6c9;
+	border: none;
+	border: .1em solid #2E7D32;
+	border-radius: 1em;
+	box-shadow: 0 9px #2E7D32;
+}
+
+.botones:hover {
+	background-color: #c8e6c9;
+	border: .1em solid #2E7D32;
+}
+
+.botones:active {
+  background-color: #c8e6c9;
+  border: .1em solid #2E7D32;
+  box-shadow: 0 5px #2E7D32;
+  transform: translateY(4px);
+}
+
+
+select{
+  padding: 15px 25px;
+  font-size: 1em;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  outline: none;
+  color: #000;
+  background-color: #CFD8DC;
+  border: none;
+  border: .2em solid #2E7D32;
+  border-radius: 1em;
+  font-family: UrbanInline;
+  box-shadow: 
+	        5px 9px 10px rgba(.5,.5,.5,.5);
+}
+
+option{
+	font-size: .8em;
+	color: #393d42;
+	background-color:#C8E6C9;
+	font-family: UrbanInline; 
+}
+
+input{
+	padding: 15px 25px;
+	font-size: 1em;
+	cursor: pointer;
+	text-align: center;
+	text-decoration: none;
+	outline: none;
+	color: #000;
+	background-color: #CFD8DC;
+	border: none;
+	border: .2em solid #2E7D32;
+	border-radius: 1em;
+	font-family: UrbanInline;
+	 box-shadow: 
+	        3px 7px 8px rgba(.3,.3,.3,.3);
+}
+
+
+button {
+	position: absolute;
+	background-color: #4CAF50; 
+	padding: 16px 32px;
+	text-align: center;
+	text-decoration: none;
+	display: inline-block;
+	font-size: 1.5em;
+	font-family: UrbanInline;
+	margin: 4px 2px;
+	-webkit-transition-duration: 0.4s;
+	transition-duration: 0.4s;
+	cursor: pointer;
+	background-color: #fff; 
+	color: #393d42; 
+	border: none;
+	border-radius: 1em ;
+	border: .15em solid #2E7D32;
+	 box-shadow: 
+	        5px 9px 10px rgba(.5,.5,.5,.5);
+}
+
+
+button:hover {
+  background-color: #4CAF50;
+  color: #fff;
+}
+
+
+/*---------------------------------------------*/
+
+/*menu de inicio*/
+
+button.botonHome {
+	position: absolute;
+	background-color: #4CAF50; 
+	text-align: center;
+	text-decoration: none;
+	display: inline-block;
+	font-size: 3.5em;
+	font-family: UrbanInline;
+	-webkit-transition-duration: 0.4s;
+	transition-duration: 0.4s;
+	cursor: pointer;
+	background-color: #fff; 
+	color: #393d42; 
+	border: none;
+	border-radius: 1em ;
+	border: .1em solid #2E7D32;
+	 box-shadow: 
+	        5px 9px 10px rgba(.5,.5,.5,.5);	
+}
+ 
+
+button.botonHome:hover {
+	background-color: #4CAF50;
+	color: #fff;
+}
+/*---------------------------------------------*/
+
+/*jugador*/
+
+/*---------------------------------------------*/
+
+/*partido*/
+
+/*---------------------------------------------*/
+
+
+	/*---------------------------------------------*/
+
+		/*resultado futbol*/
+
+input.input{
+	width: 100%;
+	height: 20%;
+	font-size:2em;
+	font-family: UrbanInline;
+	padding:.2em .8em;
+	text-align: center;
+	color: #000;
+	background-color: #CFD8DC;
+	border: .125em solid #33691E;
+	border-radius: 1em;
+}
+
+input.inputRojo{
+	width: 100%;
+	height: 20%;
+	font-size:2em;
+	font-family: UrbanInline;
+	padding:.2em .8em;
+	text-align: center;
+	color: #000;
+	background-color: #CFD8DC;
+	border: .125em solid #C62828;
+	border-radius: 1em;
+}
+
+
+td.numero{
+	
+	font-size: 1.65em;
+	font-family: UrbanInline;
+	text-align: center; 
+	background-color: #4CAF50;
+	color:#fff;
+	border: .15em solid #2E7D32;
+	border-radius: 1em;
+	width: 30%;
+}
+
+		/*---------------------------------------------*/
+
+		/*resultado basquetbol*/
+
+		/*---------------------------------------------*/
+
+		/*resultado porristas*/
+
+th.nombre{
+
+	font-size: 2em;
+	font-family: UrbanInline;
+	text-align: center; 
+	background-color: #33691E;
+	color:#fff;
+	padding: 10px 20px;
+	border: .15em solid #559910;
+	border-radius: 1em;
+	width: 50%;
+} 
+
+th.nombreRojo{
+
+	font-size: 2em;
+	font-family: UrbanInline;
+	text-align: center; 
+	background-color: #B71C1C;
+	color:#fff;
+	padding: 10px 20px;
+	border: .15em solid #E53925;
+	border-radius: 1em;
+	width: 50%;
+}
+
+td.nombre{
+
+	font-size: 1.5em;
+	font-family: UrbanInline;
+	text-align: center; 
+	background-color: #559910;
+	color:#fff;
+	padding: 10px 20px;
+	border: .25em solid #33691E;
+	border-radius: 1em;
+	width: 50%;
+}
+
+td.nombreRojo{
+
+	font-size: 1.5em;
+	font-family: UrbanInline;
+	text-align: center; 
+	background-color: #E53925;
+	color:#fff;
+	padding: 10px 20px;
+	border: .25em solid #B71C1C;
+	border-radius: 1em;
+	width: 50%;
+}
+
+		/*---------------------------------------------*/
+
+		/*resultado voleybol*/
+
+		/*---------------------------------------------*/
+
+	/*alerta de registro*/
+
+div.Aviso{
+	position: fixed;
+	text-align: center;
+	width: 63%;
+	height: 25%;
+	background-color: #CFD8DC;
+	color: #393d42;
+	padding-top: 3%;
+	border-radius: 1.5em;
+	font-size: 3.8em;
+	font-family: UrbanInline;
+	border: .15em solid #607D8B;
+	 box-shadow: 
+	        5px 9px 10px rgba(.5,.5,.5,.5);
+}
+
+button.BotonAviso {
+	position: absolute;
+	background-color: #4CAF50; 
+	padding: 16px 32px;
+	text-align: center;
+	text-decoration: none;
+	display: inline-block;
+	font-size: .5em;
+	font-family: UrbanInline;
+	margin: 4px 2px;
+	-webkit-transition-duration: 0.4s;
+	transition-duration: 0.4s;
+	cursor: pointer;
+	background-color: #fff; 
+	color: #393d42; 
+	border: none;
+	border-radius: 1em ;
+	border: 4px solid #455A64;
+	 box-shadow: 
+	        5px 9px 10px rgba(.4,.4,.4,.4);
+}
+
+
+button.BotonAviso:hover {
+  background-color: #263238;
+  color: #fff;
+  border: 4px solid #455A64;
+   box-shadow: 
+	        6px 10px 11px rgba(.5,.5,.5,.5);
+}
+
+	
+
+	
+
+
+
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

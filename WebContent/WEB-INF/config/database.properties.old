@@ -1,0 +1,48 @@
+#***************************************#
+#   API Utils							#
+#   Date: 20140723						#
+#										#
+#   Company: Arke Soluciones			#
+#	URL: www.arkesol.mx					#
+#   Author: René Gallardo				#
+#	Description: db Access file			#
+#***************************************#
+
+# DB Server name / IP and port (server:port_num)
+server=arkesol.ddnsfree.com
+
+#DB port
+port=3306
+
+
+# Application DB name
+database=interapp
+
+# DB type
+type=MySQL
+
+# DB driver
+driver=org.gjt.mm.mysql.Driver
+
+# DB connection string
+connection=jdbc:mysql://
+
+# DB user
+user=interapp
+
+# DB password for the specific DB user
+password=oH3C7!Jo5PZw5Zfc
+
+#POOL Related info
+
+# DB Datasource
+datasource=com.mysql.jdbc.jdbc2.optional.MysqlDataSource
+
+maxSize=1
+minIdle=0
+connectionTimeout=30000
+idleTimeout=120000
+#idleTimeout=1000
+maxLifeTime=1800000
+#maxLifeTime=2000
+isJDBC4=false
