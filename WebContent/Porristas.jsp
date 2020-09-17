@@ -1,4 +1,7 @@
-<%@page import="org.anahuac.garibaldi.fs.jdbc.ResourceManager"%>
+<%@page import="com.solucionesenjambre.interapp.fs.dto.Cheerleaders"%>
+<%@page import="com.solucionesenjambre.interapp.tier.CheerleadersTier"%>
+<%@page import="com.solucionesenjambre.interapp.fs.dto.VwTeams"%>
+<%@page import="com.solucionesenjambre.interapp.tier.VwTeamsTier"%>
 <%@page import="java.util.*"%>
 <%@page import="java.sql.*"%>
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
@@ -11,18 +14,7 @@
 		<link rel="stylesheet" type="text/css" href="aaaCssGeneralInterWebApp.css">
 	</head>
 	<body>
-		<%
-			String db 		= "interapp";
-			String user 	= "interapp";
-			String passwd	= "oH3C7!Jo5PZw5Zfc";
-			
-			Connection conn = null;
-			Statement stmt	= null;
-			String sql		= null;
-			Statement stmt2	= null;
-			String sql2		= null;
-			ResultSet rs	= null;
-			
+		<%			
 			String eqId;
 			String pnts;
 			String puntos;
@@ -33,14 +25,8 @@
 			String servidor = "";;
 			String pagina 	= "./IntersResultados.jsp";
 			
-			try
-			{
-				conn = ResourceManager.getConnection();
-				
-				stmt 	= conn.createStatement();
-				stmt2	= conn.createStatement();
-			}
-			catch(SQLException e){}
+			HttpSession sesion = request.getSession();
+			String eid = sesion.getAttribute("eid").toString();
 			
 			Enumeration<String> parameterNames = request.getParameterNames();
 			
@@ -56,18 +42,20 @@
 			    	pnts = "puntos|" + eqId;
 			    	
 			    	puntos = request.getParameter(pnts);
+			    				    	
+			    	CheerleadersTier cheerleadersTier = new CheerleadersTier();
+			    	Cheerleaders cheerleaders = new Cheerleaders();
 			    	
-			    	sql = "INSERT INTO porristas (ID_E, puntos) VALUES (" + eqId + ", " + puntos + ")";
+			    	int teamId = Integer.parseInt(eqId);
+			    	int points = Integer.parseInt(puntos);
 			    	
-			    	try
-			    	{
-			    		stmt.executeUpdate(sql);
-			    	}
-			    	catch(SQLException e)
-			    	{
-			    		out.println("SQLException caught: " + e.getMessage());
-			    	}
+			    	cheerleaders.setPoints(points);
+			    	cheerleaders.setTeamId(teamId);
+			    	
+			    	boolean insert = cheerleadersTier.save(cheerleaders);
+			    	
 			    }
+			    	
 			    out.println("<div \"Aviso\" style=\"top: 35%; left: 20%;\">							<div>Registro Exitoso</div>								<a  href=\"" + pagina + "\"><button class=\"BotonAviso\" style=\"position: absolute; left: 55%; top: 50%;\">Volver</button></a></div>");
 			}
 		%>
@@ -75,32 +63,28 @@
 			<%
 				try
 				{
-					sql2 = "SELECT * FROM vw_equipos WHERE nombre_equipo LIKE '%Porristas%' AND seccion_id = 2";
-					rs	 = stmt2.executeQuery(sql2);
+					VwTeamsTier vwTeamsTier = new VwTeamsTier();
+					List<VwTeams> vwTeams = null;
+					
+					String[] params = new String[2];
+					params[0] = "Porristas";
+					params[1] = eid;
+					
+					vwTeams = vwTeamsTier.browse(params);
 					
 					out.println("<table style=\"position: absolute; left:28%; width: 50%;\"><tr><th class=\"nombre\">Equipo</th><th class=\"nombre\">Puntaje</th></tr>");
 					
-					while(rs.next())
+					for(VwTeams team : vwTeams)
 					{
 						out.println("<tr><td></td></tr><tr><td></td></tr><tr><td></td></tr>");//esto es para dar espacio
-						equipo = rs.getString("Nombre");
-						id	   = rs.getInt("equipo_id");
+						equipo = team.getTeamName();
+						id	   = team.getTeamId();
 						out.println("<tr><td class=\"nombre\">" + equipo + "</td><td><input class=\"input\" name=\"puntos|" + id + "\" id=\"puntos|" + id + "\" value=\"0\" style=\" position: relative; width: 40%; left: 30%;\"></td></tr>");
 					}
 					
 					out.println("</table>");
 				}
-				catch(SQLException e)
-				{
-					out.println("SQLException caught: " + e.getMessage());
-				}
-				finally
-				{
-					try{rs.close();} catch(Exception e){}
-					try{stmt2.close();} catch(Exception e){}
-					try{stmt.close();} catch(Exception e){}
-					try{conn.close();} catch(Exception e){}
-				}
+				finally{}
 			%>
 			<br>
 			<button type="submit" style="position: fixed; width: 15%; height: 10%; left: 80%; top: 50%;">Registrar</button> 

@@ -8,12 +8,16 @@
 		<link rel="stylesheet" type="text/css" href="aaaCssGeneralInterWebApp.css">
 	</head>
 	<body>
+		<% 
+			HttpSession sesion = request.getSession();
+			String eid = sesion.getAttribute("eid").toString();
+		%>
 		<h1 class="Titulo">NOTICIAS</h1>
 		<form action="news.jsp" method="post">
+			<input type="hidden" name="eid" id = "eid" value="<% out.print(eid); %>">
 			<input style="position: absolute; top:25%; left:25%; width: 20%; height: 7%; font-size: 1.5em;" name="Titulo" id = "Titulo" placeholder="Titulo de la noticia">
 			<input style="position: absolute; top:40%; left:25%; width: 20%; height: 7%; font-size: 1.5em;" name="img" id = "img" placeholder="Nombre de la imagen">
-			<input style="position: absolute; top:55%; left:25%; width: 20%; height: 7%; font-size: 1.5em;" name="eid" id = "eid" placeholder="Codigo de Evento">
-			<input style="position: absolute; top:25%; left:55%; width: 20%; height: 40%; font-size: 1.5em;" name="desc" id = "desc" placeholder="Descripcion Larga">
+			<input style="position: absolute; top:25%; left:55%; width: 20%; height: 40%; font-size: 1.5em;" name="desc" id = "desc" placeholder="Descripcion">
 			<button style="position: absolute; top:80%; left:65%;" type="submit">Registrar</button>
 		</form>
 	</body>

@@ -1,12 +1,15 @@
-<%@page import="org.anahuac.garibaldi.fs.jdbc.ResourceManager"%>
+<%@page import="com.solucionesenjambre.interapp.tier.PlayersStatsTier"%>
+<%@page import="com.solucionesenjambre.interapp.fs.dto.PlayersStats"%>
+<%@page import="com.solucionesenjambre.interapp.fs.dto.Games"%>
+<%@page import="com.solucionesenjambre.interapp.fs.dto.Players"%>
+<%@page import="com.solucionesenjambre.interapp.tier.PlayersTier"%>
+<%@page import="com.solucionesenjambre.interapp.fs.dto.VwGames"%>
+<%@page import="com.solucionesenjambre.interapp.tier.VwGamesTier"%>
+<%@page import="com.solucionesenjambre.interapp.fs.dto.VwSports"%>
+<%@page import="com.solucionesenjambre.interapp.tier.VwSportsTier"%>
+<%@page import="com.solucionesenjambre.interapp.tier.GamesTier"%>
 <%@page import="java.sql.*"%>
 <%@page import="java.util.*"%>
-<%@page import="org.anahuac.garibaldi.fs.dto.Jugadores"%>
-<%@page import="org.anahuac.garibaldi.tier.JugadoresTier"%>
-<%@page import="org.anahuac.garibaldi.tier.VwPartidosTier"%>
-<%@page import="org.anahuac.garibaldi.fs.dto.VwPartidos"%>
-<%@page import="org.anahuac.garibaldi.fs.dto.Deporte"%>
-<%@page import="org.anahuac.garibaldi.tier.DeportesTier"%>
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
     pageEncoding="ISO-8859-1"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
@@ -25,30 +28,15 @@
 <body>
 <h1 class="Titulo">Resultados de futbol</h1>
 
-<%
-	String db 		= "interapp";
-	String user 	= "interapp";
-	String passwd	= "oH3C7!Jo5PZw5Zfc";
-	
-	Connection conn = null;
-	Statement stmt	= null;
-	Statement stmt2	= null;
-	String sql		= null;
-	String sql2		= null;
-	
+<%	
 	String jugId;
 	int jugadorId;
 	String goles;
 	String ta;
 	String tr;
 	
-	try
-	{
-		conn = ResourceManager.getConnection();
-		
-		stmt 	= conn.createStatement();
-		stmt2 	= conn.createStatement();
-	}catch(SQLException e){}
+	HttpSession sesion = request.getSession();
+	String eid = sesion.getAttribute("eid").toString();
 	
 	Enumeration<String> parameterNames = request.getParameterNames();
 	
@@ -65,11 +53,13 @@
 	String ResVisita = request.getParameter("ResVisita")== null ? "0" : request.getParameter("ResVisita");
 	int Res2 = Integer.parseInt(ResVisita);
 	
-	sql2 = "UPDATE partido SET Res_E1 = " + Res1 + ", Res_E2 = " + Res2 + ", YaJugado = 1 WHERE partido_id = " + partId;
+	GamesTier gamesTier = new GamesTier();
+	int team1Result = Res1;
+	int team2Result = Res2;
+	int gameId		= partId;
 	
 	System.out.println(depId);
-	System.out.println(partId);
-	System.out.println(sql2);		
+	System.out.println(partId);	
 	
 	while (parameterNames.hasMoreElements())
 	{
@@ -96,51 +86,66 @@
 			
 			//System.out.println(gol);
 			//System.out.println(goles);
+			PlayersStats playersStats = new PlayersStats();
+			playersStats.setGameId(partId);
+			playersStats.setPlayerId(jugadorId);
+			playersStats.setPoints(Integer.parseInt(goles));
+			playersStats.setYellowCards(Integer.parseInt(ta));
+			playersStats.setRedCards(Integer.parseInt(tr));
 			
-			sql = "INSERT INTO estadisticas_jugador (ID_J, partido_id, Goles, Tarjetas_Am, Tarjetas_Ro) VALUES(" + jugadorId + ", " + partId + ", '" + (goles == null ? 0 : goles) + "', " + (ta == null ? 0 : ta) + ", " + (tr == null ? 0 : tr) + ")";
+			PlayersStatsTier playersStatsTier = new PlayersStatsTier();
+			boolean insert = playersStatsTier.save(playersStats);
 			
-			System.out.println(sql);
-			
-			try{stmt.executeUpdate(sql);}catch(SQLException e){out.println("SQLException caught: " + e.getMessage());}
 		}
 
 	}
 	
 	if(partId !=0 && (request.getParameter("ResLocal") != null  || request.getParameter("ResVisita") != null ))
 	{
-		System.out.println("Entre");
-		try{stmt2.executeUpdate(sql2);}catch(SQLException e){}
+		Games games = new Games();
+		games.setAlreadyPlayed(1);
+		games.setTeam1Result(team1Result);
+		games.setTeam2Result(team2Result);
+		games.setGameId(gameId);
+		
+		boolean update = gamesTier.save(games);
 		partId = 0;
 	}
 	
-	try{conn.close();}catch(SQLException e){}
 %>
 	<form action="Futbol.jsp" method="post" name="frmMain" id="frmMain">
 	<%
-		DeportesTier  tier = new DeportesTier();
-		List<Deporte> deportes = tier.browseUnique("Futbol");
+		String[] vwSportsParams = new String[2];
+		vwSportsParams[0] = "Futbol";
+		vwSportsParams[1] = eid;
+	
+		VwSportsTier vwSportsTier = new VwSportsTier();
+		List<VwSports> vwSports = vwSportsTier.browse(vwSportsParams);
 		
 		out.println("	<select style=\"position: absolute; top:20.5%; left: 5%; height: 10%;\" name=\"deporteId\" id=\"deporteId\" onchange=\"postFunction()\">");
 		out.println("		<option value=\"0\" selected>Seleccione una Categoria</option>");
 		
-		for (Deporte deporte : deportes)
+		for (VwSports vwSport : vwSports)
 		{
-			out.println("		<option " + (depId == deporte.getDeporteId() ? "selected " : "") + "value=\"" + deporte.getDeporteId() + "\">" + deporte.getDescripcion() + "</option>");
+			out.println("		<option " + (depId == vwSport.getSportId() ? "selected " : "") + "value=\"" + vwSport.getSportId() + "\">" + vwSport.getDescription() + "</option>");
 		}
 		
 		out.println("	</select><br/>");
 		
 		if(depId > 0)
 		{
-			VwPartidosTier tier2 = new VwPartidosTier();
-			List<VwPartidos> partidos = tier2.get(depId);
+			String[] vwGamesParams = new String[2];
+			vwGamesParams[0] = deporteId;
+			vwGamesParams[1] = "0";
+			VwGamesTier vwGamesTier = new VwGamesTier();
+			List<VwGames> vwGames = vwGamesTier.pending(vwGamesParams);
 			
 			out.println("	<select style=\"position: absolute; top:32%; left: 5%; height: 10%;\" name=\"partidoId\" id=\"partidoId\" onchange=\"postFunction()\">");
 			out.println("		<option value=\"0\" selected>Seleccione un Partido</option>");
 			
-			for (VwPartidos partido : partidos)
+			for (VwGames vwGame : vwGames)
 			{
-				out.println("		<option " + (partId == partido.getPartidoId() ? "selected " : "") + "value=\"" + partido.getPartidoId() + "\">" + partido.getLocalCodigoDelegacion() + " vs. " + partido.getVisitanteCodigoDelegacion() + "</option>");
+				out.println("		<option " + (partId == vwGame.getGameId() ? "selected " : "") + "value=\"" + vwGame.getGameId() + "\">" + vwGame.getLocalCodeDelegacion() + " vs. " + vwGame.getVisitanteCodeDelegacion() + "</option>");
 			}
 			
 			out.println("	</select><br/>");
@@ -148,53 +153,49 @@
 			if(partId > 0)
 			{
 				System.out.println("Este es el partidoId: " + partId);
-				VwPartidos[] part = tier2.browse(partId);
+				VwGames[] games = vwGamesTier.get(partId);
 				
-				for(VwPartidos parti: part)
+				for(VwGames game : games)
 				{
 					out.println("<div style=\" position: absolute; top:17%; left:30%; width: 50%;\">");
-					out.println("	<p class=\"subtitulos\">Seccion: " + parti.getDescripcionSeccion() + "</p>");
-					out.println("	<br/><br/><p class=\"subtitulos\">Rama: " + parti.getDescripcionRama() + "</p>");
-					out.println("	<br/><br/><p class=\"subtitulos\">Fecha: " + parti.getFecha() + "</p>");
-					out.println("	<br/><br/><p class=\"subtitulos\">Hora: " + parti.getHora() + "</p>");
+					out.println("	<p class=\"subtitulos\">Seccion: " + game.getEventName() + "</p>");
+					out.println("	<br/><br/><p class=\"subtitulos\">Rama: " + game.getBranchName() + "</p>");
+					out.println("	<br/><br/><p class=\"subtitulos\">Fecha: " + game.getDate() + "</p>");
+					out.println("	<br/><br/><p class=\"subtitulos\">Hora: " + game.getTime() + "</p>");
 					out.println("</div>");
-					out.println("	<br/><br/> <p class=\"subtitulos\" style=\"position: absolute; top: 20%; left: 67.55%; width: 10%; \">" + parti.getLocalCodigoDelegacion() + "</p><p class=\"subtitulos\"> </p><p class=\"subtitulos\" style=\"position: absolute; top: 20%; left: 82%; width: 10%; \">" + parti.getVisitanteCodigoDelegacion() + "</p>");
+					out.println("	<br/><br/> <p class=\"subtitulos\" style=\"position: absolute; top: 20%; left: 67.55%; width: 10%; \">" + game.getLocalCodeDelegacion() + "</p><p class=\"subtitulos\"> </p><p class=\"subtitulos\" style=\"position: absolute; top: 20%; left: 82%; width: 10%; \">" + game.getVisitanteCodeDelegacion() + "</p>");
 
 					out.println("<div  class=\"subtitulos\" style=\"position: absolute; top: 30%; left: 60%; width: 40%; height: 15%;\">");
 					out.println("	<br/><input class=\"input\" style=\" position: relative; width: 5%; font-size: 1.5em\" name=\"ResLocal\" id=\"ResLocal\"> vs. <input class=\"input\" style=\" position: relative; width: 5%; font-size: 1.5em\" name=\"ResVisita\" id=\"ResVisita\">");
 					out.println("</div>");
 					
-					JugadoresTier tier3 = new JugadoresTier();
-					int local = parti.getLocalEquipoId();
-					int visita = parti.getVisitanteEquipoId();
-					List<Jugadores> jugadores = tier3.team(local);
-					List<Jugadores> jugadores2 = tier3.team(visita);
+					PlayersTier playersTier = new PlayersTier();
+					int local = game.getLocalTeamId();
+					int visita = game.getVisitanteTeamId();
+					List<Players> playersLocal = playersTier.getByTId(local);
+					List<Players> playersVisit = playersTier.getByTId(visita);
 					
 					out.println("	<br/><br/><table style=\"position: absolute; width: 85%; top:50%; left: 1%\">");
 					out.println("	<tr><td  style=\"width: 5%\"><td/><td style=\"width: 40%\"><table  style=\"width: 40%\"><tr> <th class=\"nombre\" style=\"font-size: 1.5em;\"> Numero </th> <th class=\"nombre\" style=\"font-size: 1.5em;\"> Nombre </th><th class=\"nombre\" style=\"font-size: 1.5em;\"> Goles </th><th class=\"nombre\" style=\"font-size: 1.5em;\"> Tarjeta <br> Amarilla </th><th class=\"nombre\" style=\"font-size: 1.5em;\"> Tarjeta <br> Roja </th></tr>");
 					
-					int i = 0;
 					
-					for(Jugadores jugador : jugadores)
+					
+					for(Players player : playersLocal)
 					{
-						i++;
-						int jId = jugador.getJugadoresId();
-						String jNombre = jugador.getNombre() + " " + jugador.getPrimerApellido() + " " + jugador.getSegundoApellido();
+						int jId = player.getPlayerId();
+						String jNombre = player.getPlayerName() + " " + player.getFirstLastname() + " " + player.getSecondLastname();
 						
-						out.println("<tr><td class=\"nombre\" style=\" position:relative; width: 10%;\">" + jugador.getNumero() + "</td><td class=\"nombre\" style=\"font-size: 1em;\">" + jNombre + "</td><td><input class=\"input\" style=\"width: 50%;\" value = \"0\" name=\"goles|" + jId + "\" id=\"goles|" + jId + "\"></td><td><input class=\"input\" style=\"width: 60%;\" value = \"0\" name=\"ta|" + jId + "\" id=\"ta|" + jId + "\"></td><td><input class=\"input\" style=\"width: 50%;\" value = \"0\" name=\"tr|" + jId + "\" id=\"tr|" + jId + "\"></td></tr>");
+						out.println("<tr><td class=\"nombre\" style=\" position:relative; width: 10%;\">" + player.getPlayerNumber() + "</td><td class=\"nombre\" style=\"font-size: 1em;\">" + jNombre + "</td><td><input class=\"input\" style=\"width: 50%;\" value = \"0\" name=\"goles|" + jId + "\" id=\"goles|" + jId + "\"></td><td><input class=\"input\" style=\"width: 60%;\" value = \"0\" name=\"ta|" + jId + "\" id=\"ta|" + jId + "\"></td><td><input class=\"input\" style=\"width: 50%;\" value = \"0\" name=\"tr|" + jId + "\" id=\"tr|" + jId + "\"></td></tr>");
 					}
 					
 					out.println("</table></td><td style=\"width:10%\"></td><td style=\"width: 40%\"><table  style=\"width: 40%\"><tr> <th class=\"nombreRojo\" style=\"font-size: 1.5em;\"> Numero </th> <th class=\"nombreRojo\" style=\"font-size: 1.5em;\"> Nombre </th><th class=\"nombreRojo\" style=\"font-size: 1.5em;\"> Goles </th><th class=\"nombreRojo\" style=\"font-size: 1.5em;\"> Tarjetas <br> Amarillas </th><th class=\"nombreRojo\" style=\"font-size: 1.5em;\"> Tarjetas <br> Rojas </th></tr>");
-					
-					i = 0;
-					
-					for(Jugadores jugador2 : jugadores2)
+							
+					for(Players player : playersVisit)
 					{
-						i++;
-						int jId = jugador2.getJugadoresId();
-						String jNombre = jugador2.getNombre() + " " + jugador2.getPrimerApellido() + " " + jugador2.getSegundoApellido();
+						int jId = player.getPlayerId();
+						String jNombre = player.getPlayerName() + " " + player.getFirstLastname() + " " + player.getSecondLastname();
 						
-						out.println("<tr><td class=\"nombreRojo\" style=\"width: 5%;\">" + jugador2.getNumero() + "</td><td class=\"nombreRojo\" style=\"font-size: 1em;\">" + jNombre + "</td><td><input class=\"inputRojo\" style=\"width: 50%;\" value = \"0\" name=\"goles|" + jId + "\" id=\"goles|" + jId + "\"></td><td><input  class=\"inputRojo\" style=\"width: 60%;\" value = \"0\" name=\"ta|" + jId + "\" id=\"ta|" + jId + "\"></td><td><input class=\"inputRojo\" style=\"width: 50%;\" value = \"0\" name=\"tr|" + jId + "\" id=\"tr|" + jId + "\"></td></tr>");
+						out.println("<tr><td class=\"nombreRojo\" style=\"width: 5%;\">" + player.getPlayerNumber() + "</td><td class=\"nombreRojo\" style=\"font-size: 1em;\">" + jNombre + "</td><td><input class=\"inputRojo\" style=\"width: 50%;\" value = \"0\" name=\"goles|" + jId + "\" id=\"goles|" + jId + "\"></td><td><input  class=\"inputRojo\" style=\"width: 60%;\" value = \"0\" name=\"ta|" + jId + "\" id=\"ta|" + jId + "\"></td><td><input class=\"inputRojo\" style=\"width: 50%;\" value = \"0\" name=\"tr|" + jId + "\" id=\"tr|" + jId + "\"></td></tr>");
 					}
 					
 					out.println("</table></td><td style=\"width:5%\"></td></tr></table>");

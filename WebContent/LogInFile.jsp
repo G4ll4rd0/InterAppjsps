@@ -1,34 +1,30 @@
-<%@page import="org.anahuac.garibaldi.fs.jdbc.ResourceManager"%>
+<%@page import="com.solucionesenjambre.interapp.fs.dto.Users"%>
+<%@page import="com.solucionesenjambre.interapp.tier.UsersTier"%>
+<%@page import="com.solucionesenjambre.interapp.fs.jdbc.ResourceManager"%>
+<%@page import="java.util.*"%>
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
     pageEncoding="ISO-8859-1"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
    <head>
       <title>Intersalesianos</title>
+      <link rel="stylesheet" type="text/css" href="aaaCssGeneralInterWebApp.css">
    </head> 
    <body>
     	<!-- Barra superior -->
-		<header>Intersalesianos 2020</header>
-
+		<h1 class= "Titulo">INTERAPP</h1> 
+	
     <!-- Div -->
     <div>
 <%@page import="java.sql.*"%>
-<% //@ include file="Database.jsp" %>
 <%
 final boolean DEBUG = false;
-	//String db = request.getParameter("db");
-	String db 		= "interapp";
-	String user 	= "interapp";
-	String passwd	= "oH3C7!Jo5PZw5Zfc";
-	
-	Connection conn = null;
-	Statement stmt	= null;
-	ResultSet rs	= null;
 	
 	String sql 		= null;
 	String prnt 	= "<br/>Usuario o contraseña incorrectos";
 	int t 			= 0;
 	int id 			= 0;
+	int eid			= 0;
 	String us 		= null;
 	String pw = null;
 	
@@ -38,31 +34,26 @@ final boolean DEBUG = false;
 	HttpSession sesion = request.getSession();
 	
 	try
-	{
-		conn = ResourceManager.getConnection();
+	{		
+		UsersTier tier = new UsersTier();
+		List<Users> usuarios = tier.findUser(us, pw);
 		
-		stmt = conn.createStatement();
-		
-		sql  = "SELECT ID_TdU, usuario_id FROM usuario WHERE Username ='" + us + "' AND Pssword ='" + pw + "'";
-		
-		rs   = stmt.executeQuery(sql);
-		
-		if (rs.next())
+		for (Users users : usuarios)
 		{
-			t  = rs.getInt("ID_TdU");
-			id = rs.getInt("usuario_id");
+			t  	= users.getUserTypeId();
+			id 	= users.getUserId();
+			eid = users.getEventId();
+			sesion.setAttribute("eid", eid);
 			sesion.setAttribute("idr", id);
 			sesion.setAttribute("tr",t);
 		}
 		String servidor = "http://" + request.getServerName()+ ":" + request.getServerPort()+ "/interapps/";
 		String pagina;
 		
-		try{conn.close();}catch(Exception e){}
-		
 		switch (t)
 		{
 			case 1:
-				pagina = "./MenuPrincipal.jsp";
+				pagina = "./MenuPrincipal.html";
 		    	response.sendRedirect(pagina);
 				break;
 			case 2:
@@ -70,25 +61,13 @@ final boolean DEBUG = false;
 			    response.sendRedirect(pagina);
 				break;
 			default:
-				out.println("<br/><button type= \"button\" class = \"logInButton\" style = \"position: absolute;width: 22%;height: 8%; top: 46%; left: 39%;font-family:Roboto Slab;font-style: normal;font-size: 1.25em;\" href=\"#\" onclick=\"javascript:window.history.back();\"> " + prnt + " volver</a>");
+				out.println("<br/><button type= \"button\" class = \"logInButton\" style = \"position: absolute;width: 22%;height: 25%; top: 46%; left: 39%;font-family:Roboto Slab;font-style: normal;font-size: 1.25em;\" href=\"#\" onclick=\"javascript:window.history.back();\"> " + prnt + " volver</a>");
 				break;
 		}
-					
-		rs.close();
 		
-	}
-	catch(SQLException e)
-	{
-		out.println("SQLException caught: " + e.getMessage());
-	}
-	finally
-	{
-		try{rs.close();} catch(Exception e){}
-		try{stmt.close();} catch(Exception e){}
-		try{conn.close();} catch(Exception e){}
-	}
+	}finally{}
 %>
 
-    </div>
+    	</div>
 	</body>
 </html>

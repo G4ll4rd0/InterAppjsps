@@ -1,22 +1,33 @@
-<%@page import="org.anahuac.garibaldi.fs.jdbc.ResourceManager"%>
+<%@page import="com.solucionesenjambre.interapp.fs.dto.Games"%>
+<%@page import="java.util.Date"%>
+<%@page import="java.text.SimpleDateFormat"%>
+<%@page import="java.text.DateFormat"%>
+<%@page import="com.solucionesenjambre.interapp.tier.TeamsTier"%>
+<%@page import="com.solucionesenjambre.interapp.tier.GamesTier"%>
+<%@page import="com.solucionesenjambre.interapp.fs.dto.Teams"%>
+<%@page import="com.solucionesenjambre.interapp.fs.dto.VwTeams"%>
+<%@page import="com.solucionesenjambre.interapp.tier.VwTeamsTier"%>
+<%@page import="com.solucionesenjambre.interapp.fs.jdbc.ResourceManager"%>
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1" pageEncoding="ISO-8859-1"%>
-<%@page import="java.sql.*" %>
 <%
 	final boolean DEBUG	= false;
 
-	String db		= "interapp";
-	String usuario	= "interapp";
-	String passwd	= "oH3C7!Jo5PZw5Zfc";
+	GamesTier gamesTier = new GamesTier();
+	boolean insert;
 	
-	Connection conn	= null;
-	Statement stmt	= null;
-	Statement stmt2	= null;    //Catch:)
-	Statement stmt3	= null;
-	ResultSet rs	= null; //Equipo 1
-	ResultSet rs2	= null; //Equipo 2
-	String sql		= null; //equipo 1
-	String sql2		= null; //equipo 2
-	String sql3		= null; //insert into
+	TeamsTier teamsTier = new TeamsTier();
+
+	String[] team1 = new String[4];
+	String[] team2 = new String[4];
+	
+	int team1Id;
+	int team2Id;
+	
+	DateFormat dateFormat = new SimpleDateFormat("dd mm yyyy");
+	DateFormat hourFormat = new SimpleDateFormat("HH:mm");
+	
+	Date date;
+	Date time;
 	
 	String disciplina	= null;
 	String rama			= null;
@@ -32,8 +43,9 @@
 	String mes;
 	String año;
 	
-	int a	= 0;
-	int b	= 0;
+	String fecha;
+	String tiempo;
+	
 	disciplina = request.getParameter("disciplina") == null ? "": request.getParameter("disciplina");
 	rama = request.getParameter("rama") == null ? "": request.getParameter("rama");
 	local = request.getParameter("local") == null ? "": request.getParameter("local");
@@ -58,53 +70,40 @@
 		out.println("<br/>seccion [" + seccion + "]");
 	}
 	
-	try{
-		conn = ResourceManager.getConnection();
+	try
+	{		
+		team1[0] = local;
+		team1[1] = disciplina;
+		team1[2] = rama;
+		team1[3] = seccion;
 		
-		stmt=conn.createStatement();
-		stmt2=conn.createStatement();
-		stmt3=conn.createStatement();
+		team2[0] = visitante;
+		team2[1] = disciplina;
+		team2[2] = rama;
+		team2[3] = seccion;
 		
-		sql="SELECT e.equipo_id FROM equipo e, rama r, delegaciones del, deporte dep, seccion s WHERE del.delegaciones_id=e.ID_D AND del.delegaciones_id ='"+local+"' AND r.rama_id = e.ID_R AND r.rama_id ='"+rama+"' AND dep.deporte_id=e.ID_De AND dep.deporte_id ='"+disciplina+"' AND s.seccion_id=e.ID_S AND s.seccion_id='" +seccion+"'";
-		sql2="SELECT e.equipo_id FROM equipo e, rama r, delegaciones del, deporte dep, seccion s WHERE del.delegaciones_id=e.ID_D AND del.delegaciones_id ='"+visitante+"' AND r.rama_id = e.ID_R AND r.rama_id ='"+rama+"' AND dep.deporte_id=e.ID_De AND dep.deporte_id ='"+disciplina+"' AND s.seccion_id=e.ID_S AND s.seccion_id='" +seccion+"'";
-		if (DEBUG) out.println("<br/><br>sql [" + sql + "]<br><br>sql2["+ sql2 +"]");
+		team1Id = teamsTier.findId(team1);
+		team2Id = teamsTier.findId(team2);
 		
+		fecha = dia + " " + mes + " " + año;
+		date = dateFormat.parse(fecha);
 		
-		rs=stmt.executeQuery(sql);
+		tiempo = hora + ":" + minutos;
+		time = hourFormat.parse(tiempo);
 		
-		System.out.println(sql);
+		//Integer.parseInt(cancha), date, time, team1Id, team2Id, Integer.parseInt(ronda)
+		Games games = new Games();
+		games.setCourtId(Integer.parseInt(cancha));
+		games.setDate(date);
+		games.setTime(time);
+		games.setTeam1Id(team1Id);
+		games.setTeam2Id(team2Id);
+		games.setRoundId(Integer.parseInt(ronda));
 		
-			if(rs.next())
-			{
-				a = rs.getInt("equipo_id");
-				System.out.println("<br><br>"+a);
-			}
+		insert = gamesTier.save(games);
 			
-		rs2=stmt2.executeQuery(sql2);
-			
-		System.out.println(sql2);
-		
-			if(rs2.next())
-			{
-				b = rs2.getInt("equipo_id");
-				System.out.println("<br><br>"+b);
-			}
-			
-			
-			//sql3="INSERT INTO partido(Fecha, ID_C, ID_Eq, ID_Eq2) VALUES ("+ hora +","+ cancha +","+ a +","+ b +");";	
-			//sql3="INSERT INTO partido(ID_C, ID_Eq, ID_Eq2) VALUES ('"+ cancha +"','"+ a +"','"+ b +"')";
-			//sql3="INSERT INTO partido(ID_C) VALUES ('1')";
-			sql3="INSERT INTO partido(ID_C, ID_Eq, ID_Eq2, Fecha, Hora, ronda_id) VALUES (" + cancha + "," + a + "," + b + ", '" + año + mes + dia +"', '" + hora + ":" + minutos + "', " + ronda + ")";
-			if(DEBUG)
-				out.println("<br><br> sql3["+sql3+"]");
-			
-			int c = 0; 
-			stmt3.executeUpdate(sql3);
-			
-			String servidor = "";
-			String pagina1	= "./IntersPartidos.jsp"; //Esta es para volver al registro
-			String pagina2	= "./MenuPrincipal.jsp";
-			
+		if(insert)
+		{
 			out.println("<!DOCTYPE html>");
 			out.println("<html>");	
 			out.println("	<head>");
@@ -119,20 +118,24 @@
 			out.println("		</div>");
 			out.println("	</body>");	
 			out.println("</html>");
+		}
+		else
+		{
+			out.println("<!DOCTYPE html>");
+			out.println("<html>");	
+			out.println("	<head>");
+			out.println("		<title>resultado</title>");			
+			out.println("		<link rel=\"stylesheet\" type=\"text/css\" href=\"aaaCssGeneralInterWebApp.css\">");				
+			out.println("	</head>");
+			out.println("	<body>");
+			out.println("		<div class=\"Aviso\" style=\"top: 35%; left: 20%;\">");
+			out.println("			<div>Problema al registrar el partido</div>");
+			out.println("			<a  href=\"./IntersPartidos.jsp\"><button class=\"BotonAviso\" style=\"position: absolute; left: 15%; top: 50%;\">Registrar otro</button></a>");
+			out.println("			<a  href=\"./MenuPrincipal.jsp\"><button class=\"BotonAviso\" style=\"position: absolute; left: 55%; top: 50%;\">menu principal</button></a>");
+			out.println("		</div>");
+			out.println("	</body>");	
+			out.println("</html>");
+		}
 	}
-	 
-	catch(SQLException e)
-	{
-		out.println("SQLException caught: " + e.getMessage());
-	}
-	finally
-	{
-		try{rs.close();} catch(Exception e){}
-		try{rs2.close();} catch(Exception e){}
-		//try{rs3.close();} catch(Exception e){}
-		try{stmt.close();} catch(Exception e){}
-		try{stmt2.close();} catch(Exception e){}
-		try{stmt3.close();} catch(Exception e){}
-		try{conn.close();} catch(Exception e){}
-	}
+	finally{}
 %>

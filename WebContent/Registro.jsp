@@ -1,16 +1,12 @@
-<%@page import="org.anahuac.garibaldi.fs.jdbc.ResourceManager"%>
+<%@page import="com.solucionesenjambre.interapp.fs.dto.Players"%>
+<%@page import="com.solucionesenjambre.interapp.tier.PlayersTier"%>
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1" pageEncoding="ISO-8859-1" %>
 <%@page import="java.sql.*" %>
 <%
-	boolean DEBUG	= false;
+	final boolean DEBUG	= false;
 
-	String db      	= "interapp";
-	String usuario 	= "interapp";
-	String passwd  	= "oH3C7!Jo5PZw5Zfc";
-	
-	Connection conn			= null;
-	Statement stmt  		= null;
-	String sql2 			= null;
+	PlayersTier playersTier = new PlayersTier();
+	boolean insertion;
 	
 	String delegacion      	= null;
 	String deporte         	= null;
@@ -20,7 +16,7 @@
 	String PrimerApellido  	= null;
 	String SegundoApellido 	= null;
 	
-	int entero				= 0;
+	int teamId				= 0;
 	int numero				= 0;
 	String numeroStr;
 	
@@ -30,22 +26,23 @@
 	SegundoApellido	=	request.getParameter("SegundoApellido") == null ? "": request.getParameter("SegundoApellido");
 	numeroStr		= 	request.getParameter("numero")	== null ? "": request.getParameter("numero");
 	
-	try{
-		numero = Integer.parseInt(numeroStr);
-	}
-	catch(Exception e){}
 	try
 	{
-		conn = ResourceManager.getConnection();
+		numero = Integer.parseInt(numeroStr);
+		teamId = Integer.parseInt(delegacion);
 		
-		stmt=conn.createStatement(); //Nombre, primer_apellido,segundo_apellido,Numero,ID_Eq
-		sql2="INSERT INTO jugadores(Nombre,primer_apellido,segundo_apellido,Numero,ID_Eq) VALUES('"+nombres+"','"+PrimerApellido+"','"+SegundoApellido+"',"+numero+","+delegacion+")";
+		Players players = new Players();
+		players.setPlayerName(nombres);
+		players.setFirstLastname(PrimerApellido);
+		players.setSecondLastname(SegundoApellido);
+		players.setPlayerNumber(numero);
+		players.setTeamId(teamId);
 		
-		System.out.println(sql2);
+		//Nombre, primer_apellido,segundo_apellido,Numero,ID_Eq
+		insertion = playersTier.save(players);
 		
-		stmt.executeUpdate(sql2);
-		
-		System.out.println("Registro hecho");
+		if(insertion)
+			System.out.println("Registro hecho");
 		
 		String servidor = "";
 		String pagina1	= "./IntersRegistro.jsp?equipoId=" + delegacion; // Esta es para volver al registro
@@ -61,7 +58,10 @@
 		out.println("	</head>");
 		out.println("	<body>");
 		out.println("		<div class=\"Aviso\" style=\"top: 35%; left: 20%;\">");
-		out.println("			<div>Jugador registrado con exito</div>");			
+		if(insertion)
+			out.println("			<div>Jugador registrado con exito</div>");			
+		else
+			out.println("			<div>Problema en el registro</div>");
 		
 		HttpSession sesion = request.getSession();
 		int tdu = (Integer)(sesion.getAttribute("tr"));
@@ -81,13 +81,5 @@
 		out.println("</html>");		
 		
 	}
-	catch(SQLException e)
-	{
-		out.println("SQLException caught: " + e.getMessage());
-	}
-	finally
-	{
-		try{stmt.close();} catch(Exception e){}
-		try{conn.close();} catch(Exception e){}
-	}
+	finally{}
 %>
